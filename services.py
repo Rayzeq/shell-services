@@ -122,7 +122,7 @@ class Service:
 
 class Watchdog:
     socket_path: Path = Path(
-        f"/run/user/{os.getuid()}/direnv-watchdog${SAFE_PATH}.sock",
+        f"/run/user/{os.getuid()}/direnv-watchdog{SAFE_PATH}.sock",
     )
     systemd_unit: str = f"direnv{SAFE_PATH}-watchdog.service"
 
@@ -155,7 +155,7 @@ class Watchdog:
 
             for pid in pids:
                 cwd_path = Path(f"/proc/{pid}/cwd")
-                if cwd_path.resolve().is_relative_to(base_path):
+                if cwd_path.resolve(strict=False).is_relative_to(base_path):
                     active = True
                 else:
                     dead_pids.add(pid)
@@ -180,7 +180,12 @@ class Watchdog:
                 "stop",
                 cls.systemd_unit,
             ],
-            check=True,
+            # systemd will only return an error if it can't find the unit,
+            # meaning the watchdog is already not running.
+            # ignoring the return code and preventing the error message from
+            # being visible
+            check=False,
+            capture_output=True,
         )
 
     @classmethod
@@ -243,7 +248,7 @@ class Watchdog:
 
 
 SERVICES: dict[str, Service] = {
-    name: Service(name, service.get("env"), service["start"], service.get("check"))
+    name: Service(name, service.get("env", {}), service["start"], service.get("check"))
     for name, service in json.loads(os.environ["SERVICES"]).items()
 }
 COLOR = ""
