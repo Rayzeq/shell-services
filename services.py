@@ -22,8 +22,9 @@ SAFE_PATH = str(Path.cwd()).replace("/", "-")
 @dataclass
 class Service:
     name: str
+    env: dict[str, str]
     start_cmd: list[str]
-    check_cmd: list[str] | None
+    check_cmd: str | None
 
     @property
     def systemd_name(self) -> str:
@@ -60,6 +61,7 @@ class Service:
                 "-u",
                 self.systemd_name,
                 f"--setenv=PWD={Path.cwd()}",
+                *(f"--setenv={name}={value}" for name, value in self.env.items()),
                 *self.start_cmd,
             ],
             check=False,
@@ -67,6 +69,7 @@ class Service:
 
         if process.returncode != 0:
             error(f"{self.name} failed to start")
+            return
 
         time.sleep(0.2)
 
@@ -86,6 +89,7 @@ class Service:
         )
         if process.returncode != 0:
             error(f"{self.name} failed to stop")
+            return
 
         time.sleep(0.2)
 
@@ -239,7 +243,7 @@ class Watchdog:
 
 
 SERVICES: dict[str, Service] = {
-    name: Service(name, service["start"], service.get("check"))
+    name: Service(name, service.get("env"), service["start"], service.get("check"))
     for name, service in json.loads(os.environ["SERVICES"]).items()
 }
 COLOR = ""

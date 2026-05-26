@@ -45,6 +45,10 @@ mkShell {
       start = [ "postgres" "-D" "./.pgdata" "-k" "\${PWD}/.pgdata/run" ];
       # Optional: command to check whether the service is running or not
       check = "pg_ctl status -D ./.pgdata > /dev/null";
+      # Optional: add environment variables
+      # env = {
+      #   TEST = "something here";
+      # };
     };
 
     # Shorthand for { start = [...]; }
