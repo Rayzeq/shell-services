@@ -59,6 +59,7 @@ class Service:
                 "-d",
                 "-u",
                 self.systemd_name,
+                f"--setenv=PWD={Path.cwd()}",
                 *self.start_cmd,
             ],
             check=False,
