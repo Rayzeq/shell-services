@@ -1,5 +1,5 @@
 { pkgs }:
-args @ { services ? { }, buildInputs ? [ ], shellHook ? "", ... }:
+args @ { services ? { }, buildInputs ? [ ], shellHook ? "", postShellHook ? "", ... }:
 let
   lib = pkgs.lib;
   inherit (lib) mkOption;
@@ -53,6 +53,6 @@ pkgs.mkShell
     buildInputs = buildInputs ++ [ command ];
     shellHook = shellHook + ''
       services --auto --pid $$ start
-    '';
+    '' + postShellHook;
   }
   // (removeAttrs args [ "services" "buildInputs" "shellHook" ])

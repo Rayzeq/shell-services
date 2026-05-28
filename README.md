@@ -38,6 +38,26 @@ mkShell {
       mkdir -p ./.pgdata/run
     fi
   '';
+  postShellHook = ''
+    # You can put commands here that will run after services are started
+    # (beware, they might not have fully started yet)
+
+    createdb -h 127.0.0.1 -p 5432 my_database 2>/dev/null || true
+
+    psql -h 127.0.0.1 -p 5432 my_database <<'EOF'
+      CREATE TABLE IF NOT EXISTS example (
+          id SERIAL PRIMARY KEY,
+          field1 TEXT NOT NULL,
+          field2 INTEGER NOT NULL,
+          created_at TIMESTAMP DEFAULT NOW()
+      );
+
+      INSERT INTO example
+      VALUES
+        ('first row', 5),
+        ('second row', 10);
+    EOF
+  '';
   
   # Define the background services for this project
   services = {
@@ -52,7 +72,7 @@ mkShell {
     };
 
     # Shorthand for { start = [...]; }
-    redis = [ "${pkgs.redis}/bin/redis-server" ]; 
+    redis = [ "${pkgs.redis}/bin/redis-server" ];
   };
 }
 ```
