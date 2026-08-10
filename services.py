@@ -16,7 +16,9 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from argparse import Namespace
 
-SAFE_PATH = str(Path.cwd()).replace("/", "-")
+DIRENV_DIR = os.environ.get("DIRENV_DIR")
+CWD = Path.cwd() if DIRENV_DIR is None else Path(DIRENV_DIR.removeprefix("-"))
+SAFE_PATH = str(CWD).replace("/", "-")
 
 
 @dataclass
@@ -57,11 +59,17 @@ class Service:
                 "systemd-run",
                 "--user",
                 "-q",
-                "-d",
+                "--working-directory",
+                str(CWD),
                 "-u",
                 self.systemd_name,
-                f"--setenv=PWD={Path.cwd()}",
-                *(f"--setenv={name}={value}" for name, value in self.env.items()),
+                "--setenv",
+                f"PWD={CWD}",
+                *(
+                    x
+                    for name, value in self.env.items()
+                    for x in ("--setenv", f"{name}={value}")
+                ),
                 *self.start_cmd,
             ],
             check=False,
@@ -136,7 +144,7 @@ class Watchdog:
         server.settimeout(2.0)
 
         pids = set()
-        base_path = Path.cwd().resolve()
+        base_path = CWD.resolve()
 
         while True:
             try:
