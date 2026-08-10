@@ -12,6 +12,11 @@ let
             (listOf str)
             (submodule {
               options = {
+                working-directory = mkOption {
+                  type = nullOr str;
+                  description = "Directory in which the command will be launched. If not absolute, this path is relative to the directory containing the .direnv file.";
+                  default = null;
+                };
                 env = mkOption {
                   type = attrsOf str;
                   description = "Environment variables to forward to the service";

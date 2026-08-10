@@ -27,6 +27,7 @@ class Service:
     env: dict[str, str]
     start_cmd: list[str]
     check_cmd: str | None
+    working_directory: str | None
 
     @property
     def systemd_name(self) -> str:
@@ -54,13 +55,23 @@ class Service:
             capture_output=True,
             check=False,
         )
+
+        working_directory: Path = (
+            CWD
+            if self.working_directory is None
+            else (
+                Path(self.working_directory)
+                if Path(self.working_directory).is_absolute()
+                else (CWD / self.working_directory).resolve()
+            )
+        )
         process = subprocess.run(
             [
                 "systemd-run",
                 "--user",
                 "-q",
                 "--working-directory",
-                str(CWD),
+                str(working_directory),
                 "-u",
                 self.systemd_name,
                 "--setenv",
@@ -256,7 +267,13 @@ class Watchdog:
 
 
 SERVICES: dict[str, Service] = {
-    name: Service(name, service.get("env", {}), service["start"], service.get("check"))
+    name: Service(
+        name,
+        service.get("env", {}),
+        service["start"],
+        service.get("check"),
+        service.get("working-directory"),
+    )
     for name, service in json.loads(os.environ["SERVICES"]).items()
 }
 COLOR = ""
