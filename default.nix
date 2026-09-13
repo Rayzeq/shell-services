@@ -53,11 +53,9 @@ let
     ${pkgs.python3}/bin/python ${./services.py} $@
   '';
 in
-pkgs.mkShell
-  {
-    buildInputs = buildInputs ++ [ command ];
-    shellHook = shellHook + ''
-      services --auto --pid $$ start
-    '' + postShellHook;
-  }
-  // (removeAttrs args [ "services" "buildInputs" "shellHook" ])
+pkgs.mkShell ({
+  buildInputs = buildInputs ++ [ command ];
+  shellHook = shellHook + ''
+    services --auto --pid $$ start
+  '' + postShellHook;
+} // (removeAttrs args [ "services" "buildInputs" "shellHook" ]))
