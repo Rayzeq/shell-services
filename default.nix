@@ -1,4 +1,4 @@
-{ pkgs }:
+{ pkgs, mkShell ? pkgs.mkShell }:
 args @ { services ? { }, buildInputs ? [ ], shellHook ? "", postShellHook ? "", ... }:
 let
   lib = pkgs.lib;
@@ -53,7 +53,7 @@ let
     ${pkgs.python3}/bin/python ${./services.py} $@
   '';
 in
-pkgs.mkShell ({
+mkShell ({
   buildInputs = buildInputs ++ [ command ];
   shellHook = shellHook + ''
     services --auto --pid $$ start
