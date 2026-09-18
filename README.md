@@ -23,6 +23,8 @@ To use the service manager, import the Nix environment and define your required 
 { pkgs ? import <nixpkgs> { } }:
 let
   mkShell = import (fetchGit "https://github.com/Rayzeq/shell-services.git") { inherit pkgs; };
+  # You can also override the mkShell function
+  # mkShell = import (fetchGit "https://github.com/Rayzeq/shell-services.git") { inherit pkgs; mkShell = pkgs.mkShellNoCC; };
 in
 mkShell {
   # Your normal development dependencies
