@@ -92,3 +92,7 @@ Once you are inside the shell, your services will automatically boot up. You can
 - `services status [name]`
 
     Displays the current status (e.g., running, dead, failed) for all project services, or prints detailed status information if a specific service is queried.
+
+## AI Disclosure
+
+The README was mostly written by AI, but the code wasn't.
